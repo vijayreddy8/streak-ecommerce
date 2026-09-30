@@ -5,14 +5,5 @@
       "source": "/(.*)",
       "destination": "/api"
     }
-  ],
-  "functions": {
-    "api/index.js": {
-      "includeFiles": [
-        "index.html",
-        "styles.css",
-        "app.js"
-      ]
-    }
-  }
+  ]
 }
