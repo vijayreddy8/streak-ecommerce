@@ -66,11 +66,11 @@ function write(file,data){
 }
 function id(){return crypto.randomBytes(5).toString("hex").toUpperCase()}
 
-app.get("/api/health",(req,res)=>res.json({status:"ok",service:"TorStaq Commerce API"}));
-app.get("/api/products",(req,res)=>res.json(products));
-app.get("/api/products/:id",(req,res)=>{const p=products.find(x=>x.id===Number(req.params.id));p?res.json(p):res.status(404).json({message:"Product not found"})});
+app.get(["/api/health","/health"],(req,res)=>res.json({status:"ok",service:"STREAK Commerce API"}));
+app.get(["/api/products","/products"],(req,res)=>res.json(products));
+app.get(["/api/products/:id","/products/:id"],(req,res)=>{const p=products.find(x=>x.id===Number(req.params.id));p?res.json(p):res.status(404).json({message:"Product not found"})});
 
-app.post("/api/auth/register",(req,res)=>{
+app.post(["/api/auth/register","/auth/register"],(req,res)=>{
  const {name,email,password}=req.body||{};
  if(!name||!email||!password)return res.status(400).json({message:"Name, email and password are required"});
  const users=read(usersFile);
@@ -79,13 +79,13 @@ app.post("/api/auth/register",(req,res)=>{
  users.push(user);write(usersFile,users);
  res.status(201).json({id:user.id,name:user.name,email:user.email});
 });
-app.post("/api/auth/login",(req,res)=>{
+app.post(["/api/auth/login","/auth/login"],(req,res)=>{
  const {email,password}=req.body||{}, users=read(usersFile);
  const u=users.find(x=>x.email===String(email||"").toLowerCase()&&x.password===password);
  u?res.json({id:u.id,name:u.name,email:u.email}):res.status(401).json({message:"Invalid email or password"});
 });
 
-app.post("/api/orders",(req,res)=>{
+app.post(["/api/orders","/orders"],(req,res)=>{
  const {customer,items}=req.body||{};
  if(!customer?.name||!customer?.email||!customer?.phone||!customer?.address||!Array.isArray(items)||!items.length)return res.status(400).json({message:"Complete customer and cart details are required"});
  const clean=items.map(i=>{const p=products.find(x=>x.id===Number(i.id));return p?{id:p.id,name:p.name,price:p.price,qty:Math.max(1,Number(i.qty)||1)}:null}).filter(Boolean);
@@ -95,7 +95,7 @@ app.post("/api/orders",(req,res)=>{
  const orders=read(ordersFile);orders.push(order);write(ordersFile,orders);
  res.status(201).json(order);
 });
-app.get("/api/orders",(req,res)=>res.json(read(ordersFile)));
+app.get(["/api/orders","/orders"],(req,res)=>res.json(read(ordersFile)));
 
 app.get("*",(req,res)=>res.sendFile(path.join(__dirname,"index.html")));
 
