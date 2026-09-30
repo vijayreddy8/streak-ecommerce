@@ -154,3 +154,80 @@ Website: https://torstaq-website.vercel.app/
 ---
 
 **WEAR YOUR STORY.**
+
+
+## ☁️ Cloud Deployment — AWS EKS
+
+STREAK now includes a production-oriented container and Kubernetes deployment setup for AWS.
+
+### Architecture
+
+```text
+GitHub
+   │
+   ▼
+GitHub Actions
+   │
+   ├── Build Docker image
+   │
+   ▼
+Amazon ECR
+   │
+   ▼
+Amazon EKS
+   │
+   ├── Deployment (2+ replicas)
+   ├── Readiness / Liveness probes
+   ├── Horizontal Pod Autoscaler
+   └── LoadBalancer Service
+           │
+           ▼
+      STREAK application
+```
+
+### Deployment files
+
+- `Dockerfile` — production Node.js container
+- `.dockerignore` — excludes unnecessary files from the image
+- `k8s/namespace.yaml` — dedicated Kubernetes namespace
+- `k8s/deployment.yaml` — application deployment, probes, resources and HPA
+- `k8s/service.yaml` — AWS LoadBalancer service
+- `.github/workflows/deploy-eks.yml` — GitHub Actions build → ECR → EKS workflow
+
+### Local Docker test
+
+```bash
+docker build -t streak-ecommerce .
+docker run --rm -p 3000:3000 streak-ecommerce
+```
+
+Open `http://localhost:3000`.
+
+### AWS prerequisites
+
+The deployment workflow expects:
+
+1. An Amazon ECR repository named `streak-ecommerce`.
+2. An existing Amazon EKS cluster and worker capacity.
+3. A GitHub Actions OIDC IAM role that can authenticate to AWS and perform the required ECR/EKS deployment operations.
+4. Repository variable `AWS_REGION`.
+5. Repository variable `EKS_CLUSTER_NAME`.
+6. Repository secret `AWS_ROLE_ARN`.
+
+The workflow uses the GitHub commit SHA as the Docker image tag, so each deployment is traceable to a source revision.
+
+### Kubernetes deployment
+
+For an existing EKS cluster, the manifests can also be applied manually:
+
+```bash
+kubectl apply -f k8s/namespace.yaml
+kubectl apply -f k8s/deployment.yaml -n streak
+kubectl apply -f k8s/service.yaml -n streak
+kubectl get pods -n streak
+kubectl get service -n streak
+```
+
+Before manual deployment, replace `ECR_IMAGE_PLACEHOLDER` in the deployment manifest with the full Amazon ECR image URI.
+
+> **Note:** The repository contains the complete deployment configuration, but AWS infrastructure provisioning and GitHub repository secrets/variables must be configured in the AWS/GitHub accounts before the workflow can perform a real cloud deployment. No credentials are stored in this repository.
