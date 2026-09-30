@@ -1,5 +1,0 @@
-<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><title>TorStaq Commerce Admin</title><link rel="stylesheet" href="/styles.css"></head><body>
-<section class="page"><p class="eyebrow">TORSTAQ COMMERCE</p><h1>Admin dashboard</h1><p>Portfolio administration view for orders and inventory.</p><div id="admin"></div></section>
-<script>
-async function load(){const os=await fetch('/api/orders').then(r=>r.json()),ps=await fetch('/api/products').then(r=>r.json());document.getElementById('admin').innerHTML='<div class="order-card"><h3>Catalog</h3><p>'+ps.length+' products · '+ps.reduce((a,p)=>a+p.stock,0)+' units shown in demo inventory</p></div>'+ (os.length?os.reverse().map(o=>'<div class="order-card"><h3>'+o.orderId+'</h3><span class="status">'+o.status+'</span><p>'+o.customer.name+' · '+o.customer.email+'</p><p>'+o.items.map(i=>i.name+' × '+i.qty).join(', ')+'</p><b>₹'+o.total.toLocaleString('en-IN')+'</b></div>').join(''):'<div class="empty">No orders yet.</div>')}</div>'}load();
-</script></body></html>
