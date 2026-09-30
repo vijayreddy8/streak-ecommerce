@@ -6,14 +6,18 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname,"public")));
 
-const dataDir = process.env.VERCEL ? path.join("/tmp","streak-data") : path.join(__dirname,"data");
-const ordersFile = path.join(dataDir,"orders.json");
-const usersFile = path.join(dataDir,"users.json");
-if(!fs.existsSync(dataDir)) fs.mkdirSync(dataDir,{recursive:true});
-if(!fs.existsSync(ordersFile)) fs.writeFileSync(ordersFile,"[]");
-if(!fs.existsSync(usersFile)) fs.writeFileSync(usersFile,"[]");
+const isVercel=Boolean(process.env.VERCEL);
+const dataDir=path.join(__dirname,"data");
+const ordersFile=path.join(dataDir,"orders.json");
+const usersFile=path.join(dataDir,"users.json");
+const memoryStore={orders:[],users:[]};
+if(!isVercel){
+  if(!fs.existsSync(dataDir)) fs.mkdirSync(dataDir,{recursive:true});
+  if(!fs.existsSync(ordersFile)) fs.writeFileSync(ordersFile,"[]");
+  if(!fs.existsSync(usersFile)) fs.writeFileSync(usersFile,"[]");
+}
 
 const products = [
 {id:1,name:"Classic Oversized T-Shirt",category:"Men",price:699,oldPrice:1029,discount:32,rating:4.5,reviews:1200,stock:35,image:"https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=900&q=80",description:"Soft heavyweight cotton tee with a relaxed oversized silhouette.",features:["240 GSM cotton","Oversized fit","Ribbed collar","Pre-shrunk"],sizes:["S","M","L","XL"],colors:["Black","White","Grey"]},
@@ -48,8 +52,18 @@ const products = [
 {id:30,name:"Daily Backpack",category:"Accessories",price:1899,oldPrice:2499,discount:24,rating:4.7,reviews:910,stock:17,image:"https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=80",description:"Clean everyday backpack with room for your laptop and essentials.",features:["Laptop sleeve","Water resistant","Padded straps","Multiple pockets"],sizes:["18 L"],colors:["Black","Grey"]}
 ];
 
-function read(file){try{return JSON.parse(fs.readFileSync(file,"utf8"))}catch{return[]}}
-function write(file,data){fs.writeFileSync(file,JSON.stringify(data,null,2))}
+function read(file){
+  if(isVercel) return file===usersFile?memoryStore.users:memoryStore.orders;
+  try{return JSON.parse(fs.readFileSync(file,"utf8"))}catch{return[]}
+}
+function write(file,data){
+  if(isVercel){
+    if(file===usersFile) memoryStore.users=data;
+    else memoryStore.orders=data;
+    return;
+  }
+  fs.writeFileSync(file,JSON.stringify(data,null,2));
+}
 function id(){return crypto.randomBytes(5).toString("hex").toUpperCase()}
 
 app.get("/api/health",(req,res)=>res.json({status:"ok",service:"TorStaq Commerce API"}));
