@@ -90,4 +90,4 @@ app.post("/api/orders",(req,res)=>{
 app.get("/api/orders",(req,res)=>res.json(read(ordersFile)));
 
 app.get("*",(req,res)=>res.sendFile(path.join(__dirname,"public","index.html")));
-app.listen(PORT,()=>console.log(`TorStaq Commerce running at http://localhost:${PORT}`));
+if (require.main === module) { app.listen(PORT,()=>console.log(`TorStaq Commerce running at http://localhost:${PORT}`)); }\n\nmodule.exports = app;
