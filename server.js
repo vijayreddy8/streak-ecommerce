@@ -8,10 +8,16 @@ const PORT = process.env.PORT || 3000;
 app.use(express.json());
 app.use(express.static(path.join(__dirname,"public")));
 
-const dataDir = path.join(__dirname,"data");
+// Vercel's deployment filesystem is read-only. Use /tmp there.
+// /tmp is writable but ephemeral, so this remains a portfolio/demo store.
+// For production persistence, replace this with a real database.
+const dataDir = process.env.VERCEL
+  ? path.join("/tmp","streak-data")
+  : path.join(__dirname,"data");
 const ordersFile = path.join(dataDir,"orders.json");
 const usersFile = path.join(dataDir,"users.json");
-if(!fs.existsSync(dataDir)) fs.mkdirSync(dataDir);
+
+if(!fs.existsSync(dataDir)) fs.mkdirSync(dataDir,{recursive:true});
 if(!fs.existsSync(ordersFile)) fs.writeFileSync(ordersFile,"[]");
 if(!fs.existsSync(usersFile)) fs.writeFileSync(usersFile,"[]");
 
