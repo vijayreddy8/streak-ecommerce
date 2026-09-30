@@ -6,7 +6,7 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-// Static storefront files live at the repository root.
+// Serve the storefront files from the repository root.
 app.get("/",(req,res)=>res.sendFile(path.join(__dirname,"index.html")));
 app.get("/index.html",(req,res)=>res.sendFile(path.join(__dirname,"index.html")));
 app.get("/styles.css",(req,res)=>res.sendFile(path.join(__dirname,"styles.css")));
@@ -93,5 +93,4 @@ app.post("/api/orders",(req,res)=>{
 });
 app.get("/api/orders",(req,res)=>res.json(read(ordersFile)));
 
-app.get("*",(req,res)=>res.sendFile(path.join(__dirname,"index.html")));
 if (require.main === module) { app.listen(PORT,()=>console.log(`TorStaq Commerce running at http://localhost:${PORT}`)); }\n\nmodule.exports = app;
