@@ -6,7 +6,11 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname,"public")));
+// Static storefront files live at the repository root.
+app.get("/",(req,res)=>res.sendFile(path.join(__dirname,"index.html")));
+app.get("/index.html",(req,res)=>res.sendFile(path.join(__dirname,"index.html")));
+app.get("/styles.css",(req,res)=>res.sendFile(path.join(__dirname,"styles.css")));
+app.get("/app.js",(req,res)=>res.sendFile(path.join(__dirname,"app.js")));
 
 // Vercel's deployment filesystem is read-only. Use /tmp there.
 // /tmp is writable but ephemeral, so this remains a portfolio/demo store.
@@ -89,5 +93,5 @@ app.post("/api/orders",(req,res)=>{
 });
 app.get("/api/orders",(req,res)=>res.json(read(ordersFile)));
 
-app.get("*",(req,res)=>res.sendFile(path.join(__dirname,"public","index.html")));
+app.get("*",(req,res)=>res.sendFile(path.join(__dirname,"index.html")));
 if (require.main === module) { app.listen(PORT,()=>console.log(`TorStaq Commerce running at http://localhost:${PORT}`)); }\n\nmodule.exports = app;
