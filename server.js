@@ -6,12 +6,12 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname,"public")));
+app.use(express.static(__dirname));
 
-const dataDir = path.join(__dirname,"data");
+const dataDir = process.env.VERCEL ? path.join("/tmp","streak-data") : path.join(__dirname,"data");
 const ordersFile = path.join(dataDir,"orders.json");
 const usersFile = path.join(dataDir,"users.json");
-if(!fs.existsSync(dataDir)) fs.mkdirSync(dataDir);
+if(!fs.existsSync(dataDir)) fs.mkdirSync(dataDir,{recursive:true});
 if(!fs.existsSync(ordersFile)) fs.writeFileSync(ordersFile,"[]");
 if(!fs.existsSync(usersFile)) fs.writeFileSync(usersFile,"[]");
 
